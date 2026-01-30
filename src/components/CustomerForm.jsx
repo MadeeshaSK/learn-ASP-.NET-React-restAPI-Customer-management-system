@@ -16,13 +16,13 @@ const CustomerForm = ({ customer, onSave, onDelete, onClear }) => {
         ? new Date(customer.birthday).toISOString().split('T')[0] 
         : ''
       
-      setFormData({
-        id: customer.id,
-        name: customer.name,
-        email: customer.email || '',
-        phone: customer.phone || '',
-        birthday: birthdayFormatted
-      })
+        setFormData({
+          id: customer.id || 0, 
+          name: customer.name || '',
+          email: customer.email || '', 
+          phone: customer.phone || '',
+          birthday: birthdayFormatted
+        })
     } else {
       setFormData({
         id: 0,
@@ -34,6 +34,7 @@ const CustomerForm = ({ customer, onSave, onDelete, onClear }) => {
     }
   }, [customer])
 
+  // Handle input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -41,6 +42,7 @@ const CustomerForm = ({ customer, onSave, onDelete, onClear }) => {
     })
   }
 
+  // Form validation function
   const validateForm = () => {
     // Name validation
     if (!formData.name.trim()) {
@@ -57,13 +59,11 @@ const CustomerForm = ({ customer, onSave, onDelete, onClear }) => {
     }
 
     // Email validation
-    if (!formData.email.trim()) {
-      alert('Please enter an email')
-      return false
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      alert('Please enter a valid email (e.g., user@example.com)')
-      return false
+    if (formData.email.trim()) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        alert('Please enter a valid email (e.g., user@example.com)')
+        return false
+      }
     }
 
     // Phone validation
@@ -87,13 +87,22 @@ const CustomerForm = ({ customer, onSave, onDelete, onClear }) => {
     return true
   }
 
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault()
     if (validateForm()) {
-      onSave(formData)
+      const dataToSend = {
+        id: Number(formData.id) || 0,
+        name: formData.name.trim(),
+        email: formData.email?.trim() || null,
+        phone: formData.phone?.trim() || null,
+        birthday: formData.birthday
+      }
+      onSave(dataToSend)
     }
   }
 
+  // Handle delete action
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this customer?')) {
       onDelete(formData.id)
@@ -127,7 +136,7 @@ const CustomerForm = ({ customer, onSave, onDelete, onClear }) => {
 
           <div className="mb-3">
             <label className="form-label">
-              Email <span className="text-danger">*</span>
+              Email 
             </label>
             <input
               type="email"
@@ -135,7 +144,6 @@ const CustomerForm = ({ customer, onSave, onDelete, onClear }) => {
               className="form-control"
               value={formData.email}
               onChange={handleChange}
-              required
             />
           </div>
 
